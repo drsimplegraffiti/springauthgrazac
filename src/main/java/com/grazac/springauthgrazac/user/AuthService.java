@@ -13,14 +13,31 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final CurrentUserUtil currentUserUtil;
     private final UserRepository userRepository;
 private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+
+    public String updateToAdmin(){
+        User loggedInUser = currentUserUtil.getLoggedInUser();
+        String username = loggedInUser.getUsername();
+        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        Optional<User> userExist =
+                userRepository.findUserByUsername(username);
+        if(userExist.isEmpty()) throw  new RuntimeException("user not found");
+        if(userExist.get().getRole().name().equals("ROLE_ADMIN")) throw new RuntimeException("already an admin");
+
+        userExist.get().setRole(Role.ROLE_ADMIN);
+        userRepository.save(userExist.get());
+        return "user updated";
+    }
 
     public String createUser(CreateUserRequest request) {
 
@@ -44,7 +61,7 @@ private final PasswordEncoder passwordEncoder;
         // User user = userRepository.findByEmail(request.getEMail);
         // if(user.isEmpty) throw new RuntimeException("message");
         Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         return jwtService.generateTokenPair(authenticate);

@@ -17,12 +17,19 @@ public class CurrentUserUtil {
     public String getLoggedInUsername() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
+        String name = authentication.getName();
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&");
+        System.out.println(name);
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&");
+        return name;
     }
 
     public User getLoggedInUser() {
         String username = getLoggedInUsername();
-        return userRepository.findUserByEmail(username)
+        System.out.println("***********************");
+        System.out.println(username);
+        System.out.println("*************************");
+        return userRepository.findUserByUsername(username)
 
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }

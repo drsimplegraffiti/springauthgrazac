@@ -4,10 +4,8 @@ import com.grazac.springauthgrazac.user.dto.CreateUserRequest;
 import com.grazac.springauthgrazac.user.dto.LoginRequest;
 import com.grazac.springauthgrazac.user.dto.TokenPair;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth") // api/v1/auth/register, api/v1/auth/login will be permitted ignored
@@ -16,6 +14,13 @@ public class UserController {
 
     private final AuthService authService;
 
+
+    @PutMapping("/switch/role")
+    @PreAuthorize("hasRole('USER')")
+//    @PreAuthorize("hasAllRoles('ADMIN')")
+    public String updateUser(){
+        return authService.updateToAdmin();
+    }
     @PostMapping("/create")
     public String createUser(@RequestBody CreateUserRequest request){
         return authService.createUser(request);
