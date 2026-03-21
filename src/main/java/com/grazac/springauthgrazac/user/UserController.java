@@ -14,7 +14,7 @@ public class UserController {
 
     private final AuthService authService;
 
-
+// authentication + authorization
     @PutMapping("/switch/role")
     @PreAuthorize("hasRole('USER')")
 //    @PreAuthorize("hasAllRoles('ADMIN')")

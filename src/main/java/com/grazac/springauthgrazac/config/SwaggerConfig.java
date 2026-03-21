@@ -12,30 +12,30 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 
 @OpenAPIDefinition(
-        info = @Info(
-                contact = @Contact(
-                        name = "Abayomi Ogunnusi",
-                        email = "abayomiogunnusi@gmail.com",
-                        url = "https://github.com/drsimplegraffiti"
-                ),
-                description = "OpenApi documentation for my spring boot app",
-                title = "Java-Springboot Template",
-                version = "1.0",
-                license = @License(
-                        name = "Licence name",
-                        url = "https://github.com/drsimplegraffiti/Book-Social-Network/blob/main/LICENSE"
-
-                ),
-                termsOfService = "https://github.com/drsimplegraffiti/Book-Social-Network/blob/main/LICENSE"
-
-        ),
+//        info = @Info(
+//                contact = @Contact(
+//                        name = "Grazac cass"
+////                        email = "abayomiogunnusi@gmail.com",
+////                        url = "https://github.com/drsimplegraffiti"
+//                ),
+////                description = "OpenApi documentation for my spring boot app",
+////                title = "Java-Springboot Template",
+//                version = "1.0",
+//                license = @License(
+//                        name = "Licence name",
+//                        url = "https://github.com/drsimplegraffiti/Book-Social-Network/blob/main/LICENSE"
+//
+//                ),
+//                termsOfService = "https://github.com/drsimplegraffiti/Book-Social-Network/blob/main/LICENSE"
+//
+//        ),
         servers = {@Server(
                 description = "Local ENV",
-                url = "http://localhost:9090"
+                url = "http://localhost:9090" // dev internal testing
         ),
                 @Server(
                         description ="Production ENV",
-                        url = "https://example.com"
+                        url = "https://daptee-58b9d8b2ab50.herokuapp.com"
                 )
         },
         security = {

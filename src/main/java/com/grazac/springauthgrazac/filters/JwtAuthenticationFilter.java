@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
@@ -30,6 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
+        log.info("REQUEST: {} {}", request.getMethod(), request.getRequestURI());  // uri and url
+
         // Bearer token -> split by a substring of 7 then pick the Token
         final String authHeader = request.getHeader("Authorization"); // pos. mobile, postman
         final String jwt;
@@ -38,6 +42,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response); // next();
             return; // stop
         }
+
+        // = == ===(Strict equal)
+//        if(request.getMethod().equals("POST")){
+//            log.info("STOPPPED HERE 88888888888888888888888888888");
+//            log.info("STOPPPED HERE 88888888888888888888888888888");
+//            filterChain.doFilter(request, response); // next();
+//            return; // stop
+//        }
 
         jwt = getJwtFromRequest(request); // will give the token
 

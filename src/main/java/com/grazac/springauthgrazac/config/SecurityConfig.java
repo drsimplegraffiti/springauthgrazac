@@ -36,6 +36,7 @@ public class SecurityConfig {
     // whitelisted url --> open route such login, signup, swagger, products
 private static  final String[] WHITE_LIST_URL = {
         "/api/v1/auth/**",
+        "/api/v1/wallets/**",
             "/v2/api-docs",
             "/v3/api-docs",
             "/v3/api-docs/**",

@@ -20,9 +20,14 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @PostMapping("/create/v2")
+    public ResponseEntity<ProductDtoResponse> createProductV2(@RequestBody ProductDto productDto, Authentication authentication){
+        return  new ResponseEntity<>(productService.createProductV2(productDto, authentication), HttpStatus.CREATED);
+    }
+
     @PostMapping("/create")
 //    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductDtoResponse> createProduct(@RequestBody ProductDto productDto, Authentication authentication){
+    public ResponseEntity<ProductDtoResponse> createProduct(@RequestBody ProductDto productDto){
         return  new ResponseEntity<>(productService.createProduct(productDto), HttpStatus.CREATED);
     }
 }
