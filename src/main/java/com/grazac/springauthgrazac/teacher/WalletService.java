@@ -27,18 +27,18 @@ public class WalletService {
         return walletRepository.findAll(spec, pageable);
     }
 
-    @PostConstruct
-    private void insertAll(){
-        walletRepository.deleteAll();
-        for (int i = 1; i < 1001; i++) {
-            Wallet wallet = Wallet.builder()
-                    .name("my" + i + "name")
-                    .subject("sub" + i + "subject")
-                    .age(i + 3)
-                    .salary((double) (i + 100))
-                    .createdAt(LocalDate.now())
-                    .build();
-            walletRepository.save(wallet);
-        }
-    }
+//    @PostConstruct
+//    private void insertAll(){
+//        walletRepository.deleteAll();
+//        for (int i = 1; i < 1001; i++) {
+//            Wallet wallet = Wallet.builder()
+//                    .name("my" + i + "name")
+//                    .subject("sub" + i + "subject")
+//                    .age(i + 3)
+//                    .salary((double) (i + 100))
+//                    .createdAt(LocalDate.now())
+//                    .build();
+//            walletRepository.save(wallet);
+//        }
+//    }
 }

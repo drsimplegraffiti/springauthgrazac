@@ -1,5 +1,6 @@
 package com.grazac.springauthgrazac.user;
 
+import com.grazac.springauthgrazac.otp.OtpVerifyRequest;
 import com.grazac.springauthgrazac.user.dto.CreateUserRequest;
 import com.grazac.springauthgrazac.user.dto.LoginRequest;
 import com.grazac.springauthgrazac.user.dto.TokenPair;
@@ -29,5 +30,16 @@ public class UserController {
     @PostMapping("/login")
     public TokenPair loginUser(@RequestBody LoginRequest request){
         return authService.loginUser(request);
+    }
+
+//    verifyUser
+@PostMapping("/verify")
+public String verifyUser(@RequestBody OtpVerifyRequest request){
+    return authService.verifyUser(request);
+}
+
+    @PostMapping("/custom")
+    public String customToken(@RequestBody String name){
+        return authService.customTokenGen(name);
     }
 }

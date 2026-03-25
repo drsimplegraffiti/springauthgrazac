@@ -34,6 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.info("REQUEST: {} {}", request.getMethod(), request.getRequestURI());  // uri and url
 
+//        // Skip JWT auth for H2 console
+//        String path = request.getRequestURI();
+//        if (path.startsWith("/h2-console")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+
         // Bearer token -> split by a substring of 7 then pick the Token
         final String authHeader = request.getHeader("Authorization"); // pos. mobile, postman
         final String jwt;

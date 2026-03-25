@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 
+
+//http://localhost:9090/swagger-ui/index.html#/
+
 @OpenAPIDefinition(
 //        info = @Info(
 //                contact = @Contact(

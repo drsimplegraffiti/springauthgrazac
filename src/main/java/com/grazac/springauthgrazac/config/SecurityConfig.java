@@ -34,9 +34,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter; // custom jwt handler
     // step 1
     // whitelisted url --> open route such login, signup, swagger, products
-private static  final String[] WHITE_LIST_URL = {
-        "/api/v1/auth/**",
-        "/api/v1/wallets/**",
+    private static  final String[] WHITE_LIST_URL = {
+            "/api/v1/auth/**",
+            "/api/v1/wallets/**",
             "/v2/api-docs",
             "/v3/api-docs",
             "/v3/api-docs/**",
@@ -74,34 +74,34 @@ private static  final String[] WHITE_LIST_URL = {
 
 
     // step 3
-@Bean
+    @Bean
     public  AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig){
         return authConfig.getAuthenticationManager();
-}
+    }
 
-// step 4
-@Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-            .cors(c -> c.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(
-                    req -> req
-                            // if(WHILE_LIST_UTL.CONTAINS("AUTH/**) || CONTAINS("ERROR) permit
-                            .requestMatchers(WHITE_LIST_URL).permitAll()
-                            .anyRequest().authenticated()
-            )
-            .sessionManagement(
-                    session -> session
-                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(
-                    jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class
-            )
-            .authenticationProvider(authenticationProvider());
-    return http.build();
-}
+    // step 4
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(c -> c.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(
+                        req -> req
+                                // if(WHILE_LIST_UTL.CONTAINS("AUTH/**) || CONTAINS("ERROR) permit
+                                .requestMatchers(WHITE_LIST_URL).permitAll()
+                                .anyRequest().authenticated()
+                )
+                .sessionManagement(
+                        session -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .authenticationProvider(authenticationProvider());
+        return http.build();
+    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
