@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return; // stop
         }
 
-        // = == ===(Strict equal)
+        // = == ===(Strict equal).
 //        if(request.getMethod().equals("POST")){
 //            log.info("STOPPPED HERE 88888888888888888888888888888");
 //            log.info("STOPPPED HERE 88888888888888888888888888888");
