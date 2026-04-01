@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,9 +37,12 @@ public class SecurityConfig {
     // whitelisted url --> open route such login, signup, swagger, products
     private static  final String[] WHITE_LIST_URL = {
             "/api/v1/auth/**",
+            "/customers/**",
+            "/customers/**",
+            "/api/v1/products/**",
             "/api/v1/wallets/**",
             "/v2/api-docs",
-            "/v3/api-docs",
+            "/external/**", //** is called a wild card
             "/v3/api-docs/**",
             "/swagger-resources",
             "/swagger-resources/**",
@@ -53,6 +57,11 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
     }
 
 // Step 2

@@ -5,7 +5,10 @@ import com.grazac.springauthgrazac.otp.*;
 import com.grazac.springauthgrazac.user.dto.CreateUserRequest;
 import com.grazac.springauthgrazac.user.dto.LoginRequest;
 import com.grazac.springauthgrazac.user.dto.TokenPair;
+import com.grazac.springauthgrazac.utils.EmailService;
 import com.grazac.springauthgrazac.utils.JwtService;
+import jakarta.mail.MessagingException;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +30,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final OtpService otpService;
     private final OtpRepository otpRepository;
+    private final EmailService emailService;
 
     public String updateToAdmin() {
         User loggedInUser = currentUserUtil.getLoggedInUser();
@@ -56,11 +60,27 @@ public class AuthService {
                 .role(Role.ROLE_USER)
                 .build();
         String code = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
-        System.out.println("micmick email sender: " + code);
-        OtpRequest otpRequest = OtpRequest.builder().email(request.getEmail()).otpCode(code).purpose("verifyaccount").build();
+        OtpRequest otpRequest = OtpRequest.builder()
+                .email(request.getEmail())
+                .otpCode(passwordEncoder.encode(code)).purpose("verifyaccount").build();
         otpService.createOtp(otpRequest);
 
         userRepository.save(user);
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("name", request.getName());
+        model.put("otpCode", code);
+
+        try {
+            emailService.sendVerificationEmail(
+                    request.getEmail(),
+                    "Verify your account",
+                    "verification", // template name without `.html`
+                    model
+            );
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
         return "success";
     }
 

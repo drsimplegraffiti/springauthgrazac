@@ -36,13 +36,16 @@ public class EmailService {
         // Set email details
         helper.setTo(to);
         helper.setSubject(subject);
+//        helper.
 
         // Prepare the HTML content using the template and data
         Context context = new Context();
         context.setVariables(templateModel);
         String htmlContent = templateEngine.process(templateName, context);
 
+        System.out.println("===================================email sent==============");
         helper.setText(htmlContent, true);
         emailSender.send(message);
+        System.out.println("email sent");
     }
 }

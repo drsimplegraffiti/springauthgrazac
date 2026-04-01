@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -72,5 +73,27 @@ public class ProductServiceImpl implements ProductService{
                 .category(savedProduct.getCategory())
                 .name(savedProduct.getName())
                 .build();
+    }
+
+    @Override
+    public List<ProductDtoResponse> getAll() {
+        // LIST --->  [ ]
+        // OBJECT ---> { }
+        // List<Product> ---> [{}. {}. ....N{}]
+        // method 1
+//        List<Product> productEntity = productRepository.findAll(); // this will got to your database
+//        return productEntity.stream().map(p -> ProductDtoResponse.builder()
+//                .price(p.getPrice())
+//                .category(p.getCategory())
+//                .name(p.getName())
+//                .build()).toList();
+
+        //method 2
+      return productRepository.findAll()
+                .stream().map(p -> ProductDtoResponse.builder()
+                .price(p.getPrice())
+                .category(p.getCategory())
+                .name(p.getName())
+                .build()).toList();
     }
 }
