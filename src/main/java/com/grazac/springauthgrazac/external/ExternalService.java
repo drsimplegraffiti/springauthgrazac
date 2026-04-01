@@ -28,7 +28,6 @@ private final RestTemplate restTemplate;
         headers.add("Authorization", "Bearer "+productDto.getToken());
         HttpEntity<ExternalProductDro> entity = new HttpEntity<ExternalProductDro>(productDto,headers);
 
-
         return restTemplate.exchange(
                 "http://localhost:9090/api/v2/products/create", HttpMethod.POST, entity, String.class).getBody();
 
