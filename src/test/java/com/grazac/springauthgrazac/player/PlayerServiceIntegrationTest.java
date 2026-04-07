@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Import({PlayerServiceImpl.class, PlayerMapper.class}) // import service + mapper for real wiring
+@Import({PlayerServiceImpl.class, PlayerMapper.class}) // import service. + mapper for real wiring
 @DisplayName("h2 database test")
 public class PlayerServiceIntegrationTest {
 
