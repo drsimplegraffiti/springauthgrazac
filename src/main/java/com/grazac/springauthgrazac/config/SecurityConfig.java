@@ -62,7 +62,7 @@ public class SecurityConfig {
     @Bean
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
-    }
+    } // traditional way webclient
 
 // Step 2
     // DaoProvide

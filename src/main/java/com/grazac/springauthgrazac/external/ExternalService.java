@@ -16,7 +16,7 @@ import java.util.List;
 
 @Service
 public class ExternalService {
-private final RestTemplate restTemplate;
+private final RestTemplate restTemplate;  // public PasswordEncoder
 
     public ExternalService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -40,7 +40,7 @@ private final RestTemplate restTemplate;
         headers.add("channel", "WEB");
         headers.add("x-api-key", "98765434567");
         headers.add("Authorization", "9876545678765");
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON)); // xml, text/html
         HttpEntity <String> entity = new HttpEntity<String>(headers);
 
 //        String body = restTemplate.exchange("http://localhost:9090/customers/products/all", HttpMethod.GET, entity, String.class).getBody();

@@ -17,7 +17,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public PlayerResponse createPlayer(PlayerRequest request) {
         Optional<Player> customerExist = repository.findPlayerByEmail(request.getEmail());
-        if(customerExist.isPresent()) throw new RuntimeException("customer already exist");
+        if(customerExist.isPresent()) throw new RuntimeException("player already exist");
         // convert dto(request) to entity (db instance)
 
         // when
@@ -30,7 +30,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public PlayerResponse getPlayer(Long id) {
         Player customer = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new RuntimeException("Player not found"));
         return mapper.toResponse(customer);
     }
 

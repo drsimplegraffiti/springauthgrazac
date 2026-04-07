@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Data
 @Builder
 @AllArgsConstructor
-@Getter
+@Getter  //? :token req.body
 public class ExternalProductDro {
         private  String name;
         private  String category;
