@@ -12,6 +12,9 @@ import com.grazac.springauthgrazac.utils.JwtService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -34,6 +38,20 @@ public class AuthService {
     private final OtpService otpService;
     private final OtpRepository otpRepository;
     private final EmailService emailService;
+
+    @Cacheable(value = "userCache", key = "#userId")
+    public User getUserById(Long userId){
+        log.info("======================fetching from db============================");
+        log.info("======================fetching from db============================");
+        return userRepository.findById(userId).orElseThrow(()-> new RuntimeException("user with this id not found"));
+    }
+
+    @CacheEvict(value = "userCache", key = "#userId")
+    public void deleteUserById(Long userId){
+        log.info("======================deleting from db============================");
+        log.info("======================deleting from db============================");
+//         userRepository.deleteById(userId);
+    }
 
     public String updateToAdmin() {
         User loggedInUser = currentUserUtil.getLoggedInUser();

@@ -42,4 +42,14 @@ public String verifyUser(@RequestBody OtpVerifyRequest request){
     public String customToken(@RequestBody String name){
         return authService.customTokenGen(name);
     }
+
+    @GetMapping("/user/{id}")
+    public User getUserById(@PathVariable Long id){
+        return authService.getUserById(id);
+    }
+
+    @DeleteMapping("/user/{id}")
+    public void deleteById(@PathVariable Long id){
+         authService.deleteUserById(id);
+    }
 }
