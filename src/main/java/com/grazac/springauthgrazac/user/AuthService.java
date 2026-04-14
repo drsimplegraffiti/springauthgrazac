@@ -1,6 +1,8 @@
 package com.grazac.springauthgrazac.user;
 
 
+import com.grazac.springauthgrazac.audit.AuditLogService;
+import com.grazac.springauthgrazac.audit.AuditRequest;
 import com.grazac.springauthgrazac.otp.*;
 import com.grazac.springauthgrazac.user.dto.CreateUserRequest;
 import com.grazac.springauthgrazac.user.dto.LoginRequest;
@@ -26,6 +28,7 @@ public class AuthService {
     private final CurrentUserUtil currentUserUtil;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final OtpService otpService;
@@ -72,6 +75,8 @@ public class AuthService {
         model.put("otpCode", code);
 
         try {
+
+            // FIRE AND FORGET ---> NON-BLOCKING
             emailService.sendVerificationEmail(
                     request.getEmail(),
                     "Verify your account",
@@ -116,6 +121,10 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(authenticate);
+        AuditRequest auditRequest = new AuditRequest();
+        auditRequest.setAction("login");
+        auditRequest.setUserId(user.get().getId());
+        auditLogService.create(auditRequest);
         return jwtService.generateTokenPair(authenticate);
     }
 

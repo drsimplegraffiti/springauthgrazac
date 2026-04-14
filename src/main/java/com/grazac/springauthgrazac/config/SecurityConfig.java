@@ -40,6 +40,7 @@ public class SecurityConfig {
             "/customers/**",
             "/customers/**",
             "/api/v1/products/**",
+            "/api/v1/profiles/**",
             "/api/v1/wallets/**",
             "/v2/api-docs",
             "/external/**", //** is called a wild card
