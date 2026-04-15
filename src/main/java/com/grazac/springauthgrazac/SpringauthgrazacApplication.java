@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 @EnableAsync
@@ -14,6 +15,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SpringauthgrazacApplication {
 
     public static void main(String[] args) {
+        Dotenv dotenv = Dotenv.configure().load();
+        dotenv.entries()
+                .forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
         SpringApplication.run(SpringauthgrazacApplication.class, args);
     }
 

@@ -51,6 +51,7 @@ public class SecurityConfig {
             "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
+            "/api/orders/**",
             "/swagger-ui.html",
             "/error"
     };

@@ -40,6 +40,7 @@ public class AuthService {
     private final EmailService emailService;
 
     @Cacheable(value = "userCache", key = "#userId")
+    // userCache:9876545678
     public User getUserById(Long userId){
         log.info("======================fetching from db============================");
         log.info("======================fetching from db============================");
