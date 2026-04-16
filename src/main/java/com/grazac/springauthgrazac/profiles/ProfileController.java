@@ -26,5 +26,6 @@ public class ProfileController {
     @PreAuthorize("hasRole('USER')")
     public String changePassword(@RequestBody ChangePasswordRequest request)  {
         return profileService.changePassword(request);
+
     }
 }
