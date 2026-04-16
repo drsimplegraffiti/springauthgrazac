@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface OtpRepository extends JpaRepository<Otp, Long> {
     Optional<Otp> findOtpByEmailAndPurposeContainingIgnoreCase(String email, String verifyaccount);
+  void deleteByEmailAndPurposeContainingIgnoreCase(String email, String purpose);
+    Optional<Otp> findOtpByEmailAndPurpose(String email, String verifyaccount);
 }

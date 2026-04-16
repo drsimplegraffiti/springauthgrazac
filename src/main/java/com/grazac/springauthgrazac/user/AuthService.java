@@ -3,6 +3,8 @@ package com.grazac.springauthgrazac.user;
 
 import com.grazac.springauthgrazac.audit.AuditLogService;
 import com.grazac.springauthgrazac.audit.AuditRequest;
+import com.grazac.springauthgrazac.exception.CustomBadRequestException;
+import com.grazac.springauthgrazac.exception.ResourceNotFoundException;
 import com.grazac.springauthgrazac.otp.*;
 import com.grazac.springauthgrazac.user.dto.CreateUserRequest;
 import com.grazac.springauthgrazac.user.dto.LoginRequest;
@@ -10,7 +12,7 @@ import com.grazac.springauthgrazac.user.dto.TokenPair;
 import com.grazac.springauthgrazac.utils.EmailService;
 import com.grazac.springauthgrazac.utils.JwtService;
 import jakarta.mail.MessagingException;
-import jakarta.validation.constraints.Email;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -41,14 +43,14 @@ public class AuthService {
 
     @Cacheable(value = "userCache", key = "#userId")
     // userCache:9876545678
-    public User getUserById(Long userId){
+    public User getUserById(Long userId) {
         log.info("======================fetching from db============================");
         log.info("======================fetching from db============================");
-        return userRepository.findById(userId).orElseThrow(()-> new RuntimeException("user with this id not found"));
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("user with this id not found"));
     }
 
     @CacheEvict(value = "userCache", key = "#userId")
-    public void deleteUserById(Long userId){
+    public void deleteUserById(Long userId) {
         log.info("======================deleting from db============================");
         log.info("======================deleting from db============================");
 //         userRepository.deleteById(userId);
@@ -96,7 +98,7 @@ public class AuthService {
         try {
 
             // FIRE AND FORGET ---> NON-BLOCKING
-            emailService.sendVerificationEmail(
+            emailService.sendEmail(
                     request.getEmail(),
                     "Verify your account",
                     "verification", // template name without `.html`
@@ -109,16 +111,16 @@ public class AuthService {
     }
 
     // assumption : otp into their inbox
-    public String verifyUser(OtpVerifyRequest request){
+    public String verifyUser(OtpVerifyRequest request) {
         Optional<User> user = userRepository.findUserByEmail(request.getEmail());
-        if(user.isEmpty()) throw new RuntimeException("user not found");
-        if(user.get().getIsVerified() == true) throw new RuntimeException("account already verified");
+        if (user.isEmpty()) throw new RuntimeException("user not found");
+        if (user.get().getIsVerified() == true) throw new RuntimeException("account already verified");
         Optional<Otp> otp = otpService.findByEmailAndPurpose(request.getEmail(), "verifyaccount");
-        if(otp.isEmpty()) throw new RuntimeException("otp not found");
+        if (otp.isEmpty()) throw new RuntimeException("otp not found");
 
-        if(otp.get().getUsed() == true) throw new RuntimeException("otp already used");
+        if (otp.get().getUsed() == true) throw new RuntimeException("otp already used");
         boolean isMatch = passwordEncoder.matches(request.getPlainOtp(), otp.get().getOtp());
-        if(!isMatch) throw new RuntimeException("invalid otp");
+        if (!isMatch) throw new RuntimeException("invalid otp");
 
         user.get().setIsVerified(true);
         otp.get().setUsed(true);
@@ -132,10 +134,10 @@ public class AuthService {
 
     public TokenPair loginUser(LoginRequest request) {
         // we this manager using custom approach
-         Optional<User> user = userRepository.findUserByUsername(request.getUsername());
-         if(user.isEmpty()) throw new RuntimeException("User not found");
+        Optional<User> user = userRepository.findUserByUsername(request.getUsername());
+        if (user.isEmpty()) throw new RuntimeException("User not found");
 
-         if(user.get().getIsVerified() == false)  throw new RuntimeException("User ont verified");
+        if (user.get().getIsVerified() == false) throw new RuntimeException("User ont verified");
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
@@ -156,5 +158,85 @@ public class AuthService {
         claims.put("sub", name);
         claims.put("role", "admin");
         return jwtService.generateCustomToken(name, Long.parseLong(expirationMs), claims);
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        // check if that email exist in db
+        User user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("email not found"));
+
+        // get initial otp saved and delete it
+        otpService.deleteOtp(user.getEmail(), "forgotPassword");
+
+        // if email is found, save otp in db, with hashed code
+        String code = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
+        System.out.println("=========================");
+        System.out.println(code);
+        System.out.println("=========================");
+        OtpRequest otpRequest = OtpRequest.builder()
+                .email(user.getEmail())
+                .otpCode(passwordEncoder.encode(code)).purpose("forgotPassword").build();
+        otpService.createOtp(otpRequest);
+
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("name", user.getName());
+        model.put("email", user.getEmail());
+        model.put("otpCode", code); // raw code to email
+
+        try {
+
+            // FIRE AND FORGET ---> NON-BLOCKING
+            emailService.sendEmail(
+                    user.getEmail(),
+                    "Forgot password",
+                    "forgotpassword", // template name without `.html`
+                    model
+            );
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+
+        // send email containing the otp: otp or link
+        // link: frontendlink?token=token
+        // grazac.com?email="shayyo@gmail.com"&token=98765434567trertyuiuytrerty vs newPassword
+        // otp vs newPassowrd and email
+
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        // check if that email exist in db
+        User user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("email not found"));
+
+        // check if otp exists
+        Optional<Otp> otp = otpService.findByEmailAndPurpose(request.getEmail(), "forgotPassword");
+        if (otp.isEmpty()) throw new CustomBadRequestException("E0 - invalid otp");
+
+
+        // match incoming otp
+        System.out.println(otp.get().getOtp() + " " + otp.get().getEmail() + " " + otp.get().getPurpose());
+        System.out.println(request.getOtpCode() + " " + otp.get().getOtp());
+        boolean isMatch = passwordEncoder.matches(request.getOtpCode(), otp.get().getOtp());
+        if (!passwordEncoder.matches(request.getOtpCode(), otp.get().getOtp()))
+            throw new CustomBadRequestException("Invalid OTP");
+        if (!isMatch) throw new CustomBadRequestException("invalid otp");
+
+        // encode password
+        String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+
+        // delete or set otp to use
+        otpService.deleteOtp(request.getEmail(), "forgotPassword");
+    }
+
+    @Transactional
+    public void resendPassword(ForgotPasswordRequest request) {
+        this.forgotPassword(request);
     }
 }

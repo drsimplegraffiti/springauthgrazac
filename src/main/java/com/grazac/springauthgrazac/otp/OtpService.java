@@ -22,12 +22,17 @@ public class OtpService {
     public void createOtp(OtpRequest request){
         Otp otp = Otp.builder()
                 .email(request.getEmail()).
-                otp(passwordEncoder.encode(request.getOtpCode()))
+                otp(request.getOtpCode())
                 .purpose(request.getPurpose()).used(false).build();
         otpRepository.save(otp);
     }
 
     public Optional<Otp> findByEmailAndPurpose(String email, String verifyaccount) {
-        return otpRepository.findOtpByEmailAndPurposeContainingIgnoreCase(email, verifyaccount);
+//        return otpRepository.findOtpByEmailAndPurposeContainingIgnoreCase(email, verifyaccount);
+        return otpRepository.findOtpByEmailAndPurpose(email, verifyaccount);
+    }
+
+    public void deleteOtp(String email, String purpose) {
+          otpRepository.deleteByEmailAndPurposeContainingIgnoreCase(email, purpose);
     }
 }

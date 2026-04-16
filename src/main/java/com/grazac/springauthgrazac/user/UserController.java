@@ -5,6 +5,7 @@ import com.grazac.springauthgrazac.user.dto.CreateUserRequest;
 import com.grazac.springauthgrazac.user.dto.LoginRequest;
 import com.grazac.springauthgrazac.user.dto.TokenPair;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,5 +52,24 @@ public String verifyUser(@RequestBody OtpVerifyRequest request){
     @DeleteMapping("/user/{id}")
     public void deleteById(@PathVariable Long id){
          authService.deleteUserById(id);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request){
+        authService.forgotPassword(request);
+        return ResponseEntity.ok("otp sent successfully");
+
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request){
+        authService.resetPassword(request);
+        return ResponseEntity.ok("password reset successfully");
+    }
+
+    @PostMapping("/resend-password")
+    public ResponseEntity<?> resendPassword(@RequestBody ForgotPasswordRequest request){
+        authService.resendPassword(request);
+        return ResponseEntity.ok("password reset successfully");
     }
 }

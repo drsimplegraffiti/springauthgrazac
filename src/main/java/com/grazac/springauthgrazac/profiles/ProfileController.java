@@ -1,10 +1,8 @@
 package com.grazac.springauthgrazac.profiles;
 
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -22,5 +20,11 @@ public class ProfileController {
     @PostMapping("/create")
     public String uploadFile(@RequestParam MultipartFile file)  {
         return profileService.upload(file);
+    }
+
+    @PostMapping("/change-password")
+    @PreAuthorize("hasRole('USER')")
+    public String changePassword(@RequestBody ChangePasswordRequest request)  {
+        return profileService.changePassword(request);
     }
 }
