@@ -93,7 +93,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
             filterChain.doFilter(request, response); // no return
-        } catch (RuntimeException e) {
+        } catch (RuntimeException e) { //handle
             throw new RuntimeException(e);
         }
 
