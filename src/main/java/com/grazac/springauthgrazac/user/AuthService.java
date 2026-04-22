@@ -6,6 +6,8 @@ import com.grazac.springauthgrazac.audit.AuditRequest;
 import com.grazac.springauthgrazac.exception.CustomBadRequestException;
 import com.grazac.springauthgrazac.exception.ResourceNotFoundException;
 import com.grazac.springauthgrazac.otp.*;
+import com.grazac.springauthgrazac.savedtoken.Token;
+import com.grazac.springauthgrazac.savedtoken.TokenService;
 import com.grazac.springauthgrazac.user.dto.CreateUserRequest;
 import com.grazac.springauthgrazac.user.dto.LoginRequest;
 import com.grazac.springauthgrazac.user.dto.TokenPair;
@@ -21,6 +23,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +44,8 @@ public class AuthService {
     private final OtpService otpService;
     private final OtpRepository otpRepository;
     private final EmailService emailService;
+    private final UserDetailsService userDetailsService;
+    private final TokenService tokenService;
 
     @Cacheable(value = "userCache", key = "#userId")
     // userCache:9876545678
@@ -146,7 +152,10 @@ public class AuthService {
         auditRequest.setAction("login");
         auditRequest.setUserId(user.get().getId());
         auditLogService.create(auditRequest);
-        return jwtService.generateTokenPair(authenticate);
+        // cookies
+        TokenPair tokenPair = jwtService.generateTokenPair(authenticate);
+        tokenService.saveToken(tokenPair.getToken(), tokenPair.getRefreshToken());
+        return tokenPair;
     }
 
     public String customTokenGen(String name) {
@@ -238,5 +247,49 @@ public class AuthService {
     @Transactional
     public void resendPassword(ForgotPasswordRequest request) {
         this.forgotPassword(request);
+    }
+
+    public TokenPair refreshToken(RefreshTokenRequest request) {
+        // check if refreshToken is revoked
+        // if revoked, throw error out
+        Optional<Token> foundToken
+                = tokenService.findByRefreshToken(request.getRefreshToken());
+        if(foundToken.get().isRefreshTokenRevoked()
+        ){
+            throw  new CustomBadRequestException("Revoked:: invalid token");
+        }
+
+        // to avoid bloating that db, use cron job to delete token that the date created + 10 days
+
+        String refreshToken = request.getRefreshToken();
+        if(!jwtService.isRefreshToken(refreshToken)){
+            throw  new CustomBadRequestException("E0 - invalid token");
+        }
+
+        // upload login: access token and refresh token --> generates a new access token (15 minutes)
+        String user = jwtService.extractUsernameFromToken(refreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user);
+
+        if(userDetails == null){
+            throw  new CustomBadRequestException("user does not exist");
+        }
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                userDetails,null, userDetails.getAuthorities()
+        );
+
+        // revoke/invalidate old token ---> use redis, save it against timestamp (tuesday)
+        // for every token you generate ---> have a flag of revoked (default) == false
+        // revoke both access and refreshtoken
+
+        //invalidate old token
+        tokenService.revoke(refreshToken);
+
+        // cookies
+        String accessToken = jwtService.generateAccessToken(authentication);
+//        String newRefreshToken = jwtService.generateRefreshToken(authentication);
+
+        return new TokenPair(accessToken, refreshToken);
+
     }
 }

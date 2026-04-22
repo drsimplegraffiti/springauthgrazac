@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Component
 public class AuditCleanupJob {
 
-
     private final AuditLogRepository auditLogRepository;
 
     public AuditCleanupJob(AuditLogRepository auditLogRepository) {

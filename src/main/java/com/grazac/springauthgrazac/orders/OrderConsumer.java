@@ -27,11 +27,9 @@ public class OrderConsumer {
     @RabbitListener(queues = RabbitConfig.QUEUE)
     public void consumeMessage(@Payload ProducerMessage request) {
         System.out.println("Received: " + request);
-        // {
-        //"message":"ab@g.com"
-        //}
         createNewUser(request.getEmail());
     }
+
 
     private void createNewUser(String email) {
         Optional<User> user = userRepository.findByEmail(email);

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 public class JwtService {
 
-// Step 1
+    // Step 1
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
@@ -32,7 +32,7 @@ public class JwtService {
     private String refreshExpirationMs; // 1 day -month or days
 
 
-//| Field             | Meaning                       |
+    //| Field             | Meaning                       |
 //            | ----------------- | ----------------------------- |
 //            | **principal**     | the user (UserDetails object) |
 //            | **credentials**   | password or token             |
@@ -40,7 +40,7 @@ public class JwtService {
 //            | **authenticated** | whether login succeeded       |
     // Setp 2:
     // Generic token util
-    public String generateToken(Authentication authentication, long expirationMs, Map<String, String> claims){
+    public String generateToken(Authentication authentication, long expirationMs, Map<String, String> claims) {
 
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
         log.info(String.valueOf(userPrincipal.getUsername()));
@@ -60,7 +60,7 @@ public class JwtService {
     }
 
 
-    public String generateCustomToken(String name, long expirationMs, Map<String, String> claims){
+    public String generateCustomToken(String name, long expirationMs, Map<String, String> claims) {
 
         Date now = new Date(); // current date
         Date expiryDate = new Date(now.getTime() + expirationMs); // currrent date + anytime of our choice
@@ -80,7 +80,7 @@ public class JwtService {
 
     // Step 3
     // access token and refreshtoken
-    public String generateAccessToken(Authentication authentication){
+    public String generateAccessToken(Authentication authentication) {
         HashMap<String, String> claims = new HashMap<>();
         claims.put("tokenType", "access");     //
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -95,13 +95,14 @@ public class JwtService {
         return generateToken(authentication, Long.parseLong(jwtExpirationMs), claims);
     }
 
-    public String generateRefreshToken(Authentication authentication){
+    public String generateRefreshToken(Authentication authentication) {
         HashMap<String, String> claims = new HashMap<>();
         claims.put("tokenType", "refresh");
         //                                                    840000000000
         return generateToken(authentication, Long.parseLong(refreshExpirationMs), claims);
     }
-//
+
+    //
     public TokenPair generateTokenPair(Authentication authentication) {
 
         // Create access token
@@ -114,6 +115,19 @@ public class JwtService {
         return new TokenPair(accessToken, refreshToken);
     }
 
+    public boolean isRefreshToken(String token) {
+        Claims claims = extractClaims(token);
+        if (claims == null) {
+            return false; // email,unique identifer
+        }
+
+        System.out.println("==+++++=========&&&&&&&&&&==========================");
+        System.out.println(claims);
+        System.out.println(claims.get("tokenType"));
+        System.out.println("=====================================");
+        return "refresh".equals(claims.get("tokenType")); // refresh != access
+    }
+
 
     // 1 byte = 8 bits (0000 0000)
     private SecretKey getSignInKey() {
@@ -122,7 +136,7 @@ public class JwtService {
     }
 
     // Step 4 extract all claims i.e all payload like sub from the token
-    private Claims extractClaims(String token){
+    private Claims extractClaims(String token) {
         Claims claims = null;
         try {
             claims = Jwts.parser().verifyWith(getSignInKey())
@@ -133,26 +147,26 @@ public class JwtService {
             throw new RuntimeException(e);
         }
 
-        return  claims;
+        return claims;
     }
 
     // Step 5
     // extract username from token
-    public String extractUsernameFromToken(String token){
+    public String extractUsernameFromToken(String token) {
         Claims claims = extractClaims(token);
-        if(claims != null){
+        if (claims != null) {
             return claims.getSubject(); // email or username or any unique id
         }
         return null;
     }
 
     // step 6 validate token for users
-    public boolean isValidToken (String token){
+    public boolean isValidToken(String token) {
         return extractClaims(token) != null;
     }
 
     // Step 7 Vaidate token by checking username matches the user in spring
-    public boolean validateTokenForUser(String token, UserDetails userDetails){
+    public boolean validateTokenForUser(String token, UserDetails userDetails) {
         final String username = extractUsernameFromToken(token);
         return username != null && username.equals(userDetails.getUsername()); // short circuit
     }

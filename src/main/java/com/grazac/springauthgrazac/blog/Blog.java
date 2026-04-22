@@ -10,7 +10,4 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/blogs")
 public class Blog {
 
-
-//    @PreAuthorize()
-//    @PostMapping
 }

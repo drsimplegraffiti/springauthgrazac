@@ -1,6 +1,9 @@
 package com.grazac.springauthgrazac.filters;
 
 
+import com.grazac.springauthgrazac.exception.CustomBadRequestException;
+import com.grazac.springauthgrazac.savedtoken.Token;
+import com.grazac.springauthgrazac.savedtoken.TokenService;
 import com.grazac.springauthgrazac.utils.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final TokenService tokenService;
 
     @Override
     protected void doFilterInternal(
@@ -58,7 +63,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //            return; // stop
 //        }
 
+
         jwt = getJwtFromRequest(request); // will give the token
+        Optional<Token> byAccessToken = tokenService.findByAccessToken(jwt);
+        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        System.out.println(byAccessToken);
+        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        if(byAccessToken.get().isAccessTokenRevoked()){
+            System.out.println("should stop here");
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // verify if the token is valide or not
         if(!jwtService.isValidToken(jwt)){
